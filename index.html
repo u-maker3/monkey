@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>うめこンサル🐒｜ひとり商売の迷子センター</title>
+<style>
+:root{--ink:#33271f;--sub:#76675d;--cream:#fff9ee;--card:#fff;--red:#d84c4c;--green:#617b5b;--gold:#d9a62e;--line:#eadfce}
+*{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;color:var(--ink);background:linear-gradient(180deg,#fff8e9,#f7ead7);min-height:100vh}
+.wrap{max-width:680px;margin:auto;padding:18px 16px 50px}.card{background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:26px;padding:22px;box-shadow:0 14px 35px #6b4b2820}
+.hero{text-align:center}.hero img{width:min(260px,72vw);height:250px;object-fit:contain}.logo{font-size:34px;font-weight:900;letter-spacing:-1px}.tag{font-weight:800;font-size:20px}.lead{color:var(--sub);line-height:1.8}
+input{width:100%;padding:15px;border:2px solid var(--line);border-radius:15px;font-size:16px;background:#fff}
+button,.btn{width:100%;border:0;border-radius:16px;padding:15px 16px;margin-top:11px;font-weight:800;font-size:16px;cursor:pointer;text-decoration:none;display:block;text-align:center}
+.primary{background:var(--red);color:#fff}.secondary{background:#f1eadf;color:var(--ink)}.line{background:#4f9a67;color:#fff}.option{background:#fff;border:2px solid var(--line);text-align:left;color:var(--ink)}
+.option:hover{border-color:var(--gold)} .qno{color:var(--red);font-weight:900}.question{font-size:23px;font-weight:900;line-height:1.45;margin:8px 0 16px}.tiny{font-size:12px;color:#8a7d73;line-height:1.6}
+.monkey{display:block;width:190px;height:180px;object-fit:contain;margin:0 auto}.result-title{text-align:center;font-size:28px;font-weight:900}.badge{display:inline-block;background:#fff1cf;padding:7px 11px;border-radius:999px;font-weight:900}
+.sermon{font-size:24px;font-weight:900;line-height:1.45;margin:12px 0}.box{background:#fff8ea;border-radius:18px;padding:16px;margin:13px 0}.box h3{margin:0 0 8px}.meter{display:grid;grid-template-columns:92px 1fr 28px;gap:8px;align-items:center;margin:9px 0}.track{height:11px;background:#eee4d8;border-radius:10px;overflow:hidden}.fill{height:100%;background:var(--gold);border-radius:10px}
+.actions li{margin:8px 0;line-height:1.55}.hide{display:none}.progress{height:7px;background:#eadfce;border-radius:10px;overflow:hidden;margin-bottom:18px}.progress div{height:100%;background:var(--red)}
+#shareCard{background:#fffaf0;border:2px solid #ead6b6;border-radius:22px;padding:18px;margin-top:12px}
+</style>
+</head>
+<body><main class="wrap">
+<section id="start" class="card hero">
+  <img src="umeko.PNG" alt="うめこンサル">
+  <div class="logo">うめこンサル🐒</div>
+  <p class="tag">ひとり商売、迷子になってへん？</p>
+  <p class="lead">商品はある。やりたいこともある。SNSも一応やってる。<br><b>なのに、何から手ぇ付けたらええか分からん🤣</b><br>ほな、いっぺん整理しよか。</p>
+  <input id="name" maxlength="20" placeholder="名前（入れんでもOK）">
+  <button class="primary" onclick="begin()">🐒 うめこに相談する</button>
+  <p class="tiny">入力内容は保存しません。ログイン不要・外部API不使用。これは、ひとり商売の思考整理を助けるツールです。</p>
+</section>
+
+<section id="quiz" class="card hide">
+ <div class="progress"><div id="bar"></div></div>
+ <div class="qno" id="qno"></div><div class="question" id="qtext"></div><div id="options"></div>
+</section>
+
+<section id="result" class="card hide">
+ <div id="shareCard">
+  <div class="result-title">🐒 本日の説教</div>
+  <img id="resultImg" class="monkey" alt="">
+  <div style="text-align:center"><span class="badge" id="typeBadge"></span></div>
+  <div class="sermon" id="sermon"></div>
+  <p id="reason" class="lead"></p>
+  <div class="box"><h3>🐒 あなたの三猿度</h3><div id="meters"></div></div>
+  <div class="box"><h3>✋ 今日やらんでええこと</h3><div id="dont"></div></div>
+  <div class="box"><h3>🔥 今日やること3つ</h3><ol class="actions" id="actions"></ol></div>
+  <div class="box"><h3>📣 うめこから一言</h3><b id="word"></b></div>
+  <p style="text-align:center;font-weight:900">うめこンサル🐒｜ひとり商売の迷子センター</p>
+ </div>
+ <button class="primary" onclick="saveCard()">📸 この説教を画像で持ち帰る</button>
+ <button class="secondary" onclick="restart()">🐒 もう一発くらう</button>
+ <a class="btn line" href="https://lin.ee/O23Sb7o" target="_blank" rel="noopener">🥸 猿では解決せんかったので人間のうめこを呼ぶ</a>
+ <p class="tiny" style="text-align:center">保存した結果画像をLINEで見せてもろたら、話が早い🤣</p>
+</section>
+</main>
+
+<script>
+const routes={
+ price:{label:"💰 値段",qs:[
+  ["その値段、何を根拠に決めた？",[["材料費・時間・利益まで考えた",{}],["相場を見て決めた",{see:1}],["なんとなくこの辺🤣",{see:2}],["高いと思われん金額にした",{see:2,speak:1}]]],
+  ["実際のお客さんから値段について何て言われた？",[["具体的な反応を聞いてる",{}],["特に何も言われてない",{hear:1}],["聞いたことない",{hear:2}],["まだ売ってない🤣",{see:1,hear:2}]]],
+  ["その値段になる理由、お客さんに説明できる？",[["できる",{}],["聞かれたらできる",{speak:1}],["うーん……",{speak:2}],["値段だけ置いて逃げてる🤣",{speak:3}]]],
+  ["値下げしたくなる瞬間は？",[["数字を見て必要だと判断した時",{}],["売れない期間が続いた時",{see:1}],["他の人が安かった時",{see:2}],["投稿して3時間反応なかった時🤣",{see:2,hear:1}]]]
+ ]},
+ product:{label:"🛍️ 商品・メニュー",qs:[
+  ["その商品、誰の何を助けるもん？",[["一文で言える",{}],["だいたい言える",{speak:1}],["説明すると長い",{speak:2}],["みんなにおすすめ🤣",{hear:2,speak:2}]]],
+  ["作る前に欲しい人の声、聞いた？",[["聞いて作った",{}],["少し聞いた",{hear:1}],["聞いてない",{hear:2}],["私が欲しいから作った🤣",{hear:3}]]],
+  ["今あるメニュー、初見の人が選べる数？",[["選びやすい",{}],["ちょい多い",{see:1}],["かなり多い",{see:2}],["自分でも全部覚えてない🤣",{see:3}]]],
+  ["新しい商品を作りたくなる理由は？",[["明確な需要がある",{}],["季節や企画に必要",{hear:1}],["今のが売れへんから",{see:2}],["思いついたから全部やる🤣",{see:2,hear:1}]]]
+ ]},
+ sales:{label:"💸 集客・売上",qs:[
+  ["その商品、今月何回ちゃんと案内した？",[["何回もした",{}],["2〜3回",{speak:1}],["1回くらい",{speak:2}],["した記憶がない🤣",{speak:3}]]],
+  ["売上や申込数、ざっくりでも把握してる？",[["把握してる",{}],["たまに見る",{see:1}],["感覚で判断",{see:2}],["怖いから見てない🤣",{see:3}]]],
+  ["お客さんに『なんで買った？』って聞いたことある？",[["ある。理由も分かる",{}],["たまに聞く",{hear:1}],["聞いたことない",{hear:2}],["私が欲しいもん作ってる🤣",{hear:3}]]],
+  ["初めて見た人が10秒で『何をいくらで買えるか』分かる？",[["分かる",{}],["たぶん",{speak:1}],["値段はDMで♡",{speak:2}],["メニューどこやったっけ🤣",{speak:3,see:1}]]]
+ ]},
+ sns:{label:"📱 SNS・発信",qs:[
+  ["その投稿、誰に読んでほしいか決めてる？",[["決めてる",{}],["なんとなく",{hear:1}],["フォロワー全員",{hear:2}],["世界中🤣",{hear:3}]]],
+  ["プロフィール見て10秒で何屋さんか分かる？",[["分かる",{}],["たぶん",{speak:1}],["色々書きすぎ",{speak:2}],["自分でも説明むずい🤣",{speak:3}]]],
+  ["反応を見る時、何を見てる？",[["申込・保存・クリック等",{}],["いいね中心",{see:1}],["閲覧数だけ",{see:2}],["投稿後ずっと更新🤣",{see:2}]]],
+  ["投稿で商品案内する頻度は？",[["自然に案内してる",{}],["たまに",{speak:1}],["売り込みと思われそうで少ない",{speak:2}],["察してほしい🤣",{speak:3}]]]
+ ]},
+ many:{label:"🌀 やりたいこと多すぎ",qs:[
+  ["今動かしてる企画、何個ある？",[["1〜2個",{}],["3〜4個",{see:1}],["5個以上",{see:2}],["数えたくない🤣",{see:3}]]],
+  ["その中で『今いちばん売りたいもの』言える？",[["言える",{}],["2つある",{see:1}],["いっぱいある",{see:2}],["全部主役🤣",{see:3}]]],
+  ["お客さんからよく求められるもの把握してる？",[["把握してる",{}],["なんとなく",{hear:1}],["聞いてない",{hear:2}],["次々作る方が楽しい🤣",{hear:3}]]],
+  ["今月いちばん推すもの、ちゃんと伝えてる？",[["伝えてる",{}],["少し",{speak:1}],["日によって変わる",{speak:2}],["毎日違う店みたい🤣",{speak:3}]]]
+ ]},
+ lost:{label:"😇 何が問題か分からん",qs:[
+  ["まず、売上・申込・反応のどれが困ってるか言える？",[["言える",{}],["ぼんやり",{see:1}],["全部な気がする",{see:2}],["何となく不安🤣",{see:3}]]],
+  ["最近、お客さんの声を直接聞いた？",[["聞いた",{}],["少し",{hear:1}],["聞いてない",{hear:2}],["脳内会議だけしてる🤣",{hear:3}]]],
+  ["今いちばん売りたいものを一文で案内できる？",[["できる",{}],["ちょっと長くなる",{speak:1}],["難しい",{speak:2}],["まず何売るか決めたい🤣",{speak:3,see:1}]]],
+  ["今日ひとつだけ仕事を進めるなら何する？",[["すぐ決められる",{}],["候補2つ",{see:1}],["候補いっぱい",{see:2}],["猿に決めてほしい🤣",{see:3}]]]
+ ]}
+};
+
+const common=[
+ ["まず聞くけど。あんた今、商売たのしい？",[["めっちゃ楽しい",{}],["楽しいけど売れへん🤣",{see:1}],["何したらええか分からん",{see:1}],["ちょっと疲れてきた",{see:1}],["もう知らん。猿に聞きに来た🐒",{see:1}]]]
+];
+
+const resultCopy={
+ price:{
+  see:["🙈 見ざる","高い安いの前に、まず数字見よか🤣","値段そのものより、根拠が曖昧なまま不安だけで動いてる可能性が高い。","他人の値段を延々見に行く。",["材料費・時間・利益を書き出す","仮価格を1個決める","その価格で一度ちゃんと案内する"],"売る前から値下げすな。まだ誰も高い言うてへん🤣"],
+  hear:["🙉 聞かざる","お客さん何も言うてへんのに、一人で値下げ会議すな🤣","価格への不安を、お客さんの実際の反応より自分の想像で膨らませてるかも。","脳内のお客さん100人にアンケートする。",["既存客1人に選んだ理由を聞く","価格への反応をメモする","その声を次の案内文に使う"],"想像のお客さんより、本物のお客さんに聞こ🐒"],
+  speak:["🙊 言わざる","値段だけ見せて、価値は念で送ってんのか🤣","金額の理由や得られるものが伝わらなければ、相手は価格だけで判断するしかない。","値段だけ下げて様子を見る。",["誰向けの商品か1文で書く","何が得られるか3つ書く","価格と一緒に堂々と案内する"],"察してくれは商売では通用せん。うめこでもエスパーちゃう🤣"]
+ },
+ product:{
+  see:["🙈 見ざる","新作の前に、今ある店内を見渡そか🤣","増やすことが解決になって、既存メニューの整理が後回しになってるかも。","また新しいメニューを1個増やす。",["今ある商品を全部書く","主役を1つ決める","似たものをまとめる"],"新作会議より先に在庫確認や🐒"],
+  hear:["🙉 聞かざる","作りたいもんと、欲しいもん。一回分けよ🤣","自分のアイデアは豊富でも、お客さんの困りごとの確認が薄い可能性あり。","完成してから需要を祈る。",["3人に困りごとを聞く","よく出る言葉を拾う","その言葉に合う商品を1つ選ぶ"],"お客さん置いて先に走ったら、ゴールで一人や🤣"],
+  speak:["🙊 言わざる","ええ商品でも、説明が迷子や🤣","誰向けで何が変わるのかが一言で伝わらないと、選びにくい。","説明文をさらに長くする。",["対象を1人に絞る","変化を1文にする","商品名・価格・申込方法を並べる"],"説明100行より『誰の何がどうなる』や🐒"]
+ },
+ sales:{
+  see:["🙈 見ざる","売れへん判定する前に、数字見た？🤣","感覚だけでは、見られてないのか、見られてるけど買われないのか切り分けできない。","全部『集客不足』のせいにする。",["今月の案内回数を書く","問い合わせ・申込数を書く","どこで止まってるか1個決める"],"数字は説教せえへん。事実だけ教えてくれる🤣"],
+  hear:["🙉 聞かざる","売る会議に、お客さん呼び忘れてるで🤣","買う理由・迷う理由を聞かずに改善すると、ズレた努力になりやすい。","新しい集客術を探し回る。",["買った理由を1人に聞く","迷った理由も聞く","同じ言葉を案内に反映する"],"答え、インスタの外におるかもしれんで🐒"],
+  speak:["🙊 言わざる","売れへんのちゃう。何売ってるか分からんのや🤣","案内回数や価格・申込方法が見えなければ、欲しい人も動けない。","新商品を作る。",["商品名を書く","値段を書く","誰にどうなる商品か1文で投稿する"],"『察してくれ』は商売では通用せん🤣"]
+ },
+ sns:{
+  see:["🙈 見ざる","いいね監視員になってへん？🤣","反応の数字を見るなら、目的に近い指標を見ないと改善につながりにくい。","投稿3分後から更新連打。",["投稿の目的を1つ決める","見る数字を1つ決める","1週間単位で振り返る"],"1投稿で人生決めんでええ🤣"],
+  hear:["🙉 聞かざる","誰に喋ってるか、途中で消えてるで🤣","相手が曖昧だと、内容も言葉も広がりすぎて刺さりにくい。","全人類に好かれる投稿を考える。",["今日届ける相手を1人決める","その人の悩みを1つ書く","その悩みだけで1投稿作る"],"世界中に言うより、一人に届かせよ🐒"],
+  speak:["🙊 言わざる","発信してる。でも商売の話してへん🤣","役立つ投稿だけでも、何を頼める人なのか伝わらなければ申込にはつながりにくい。","さらに有益投稿だけ増やす。",["プロフィールに何屋か書く","今売りたいものを1つ載せる","価格と申込方法まで案内する"],"売り込み嫌われる前に、まず売ってること知らせよ🤣"]
+ },
+ many:{
+  see:["🙈 見ざる","全部主役は、全員モブになるやつ🤣","優先順位がないと、時間も発信も分散して成果が見えにくくなる。","7個同時に完成させる。",["進行中を全部書く","今月の主役を1つ丸で囲む","残りは『あとで箱』へ入れる"],"思いつく才能と、今やる仕事は別や🐒"],
+  hear:["🙉 聞かざる","新作の前に『それ欲しい』聞いた？🤣","アイデアの量に、お客さんの需要確認が追いついてないかも。","思いついた順に商品化する。",["よく頼まれるものを書く","お客さん3人の声を見る","需要が重なる1つを優先する"],"脳内新商品展示会、いったん閉幕🤣"],
+  speak:["🙊 言わざる","店頭が毎日模様替えしてる状態や🤣","推すものが頻繁に変わると、お客さんが何を選べばいいか分かりにくい。","明日また別の商品を推す。",["今月の主役を1つ決める","同じ商品を角度を変えて3回案内","申込先を毎回同じ場所に置く"],"飽きてるん自分だけ。客は今日初めて見たかもしれん🤣"]
+ },
+ lost:{
+  see:["🙈 見ざる","『なんか不安』を、いったん分解しよ🤣","問題が大きいというより、現状が見える形になってない可能性がある。","人生全部を今日解決する。",["困ってる数字を1つ選ぶ","今月の現状を書く","今日変えられる1個だけ決める"],"霧の中で走るより、まず足元見よ🐒"],
+  hear:["🙉 聞かざる","脳内会議、参加者あんただけや🤣","自分だけで考え続けると、本当のお客さんの困りごとから離れることがある。","一人でさらに3時間考える。",["最近のお客さん1人に聞く","困ってたことをメモする","自分の商品とつながる所を探す"],"会議室から一回出よ🤣"],
+  speak:["🙊 言わざる","まず『私はこれ売ってます』からや🤣","自分でも言い切れない状態では、お客さん側はもっと判断しづらい。","キャッチコピーを50案作る。",["今売りたいものを1つ決める","価格を書く","誰向けか一文で案内する"],"迷子札には名前と行き先を書くんや🐒"]
+ }
+};
+
+let scores={see:0,hear:0,speak:0}, route=null, questions=[], qi=0, uname="";
+function begin(){
+ uname=document.getElementById("name").value.trim();
+ document.getElementById("start").classList.add("hide");
+ document.getElementById("quiz").classList.remove("hide");
+ questions=[...common,{routePick:true}]; qi=0; renderQ();
+}
+function renderQ(){
+ let q=questions[qi];
+ document.getElementById("bar").style.width=((qi)/(questions.length||1)*100)+"%";
+ document.getElementById("qno").textContent="Q"+(qi+1);
+ if(q.routePick){
+  document.getElementById("qtext").textContent="で、何がいちばん引っかかってる？";
+  let o=document.getElementById("options"); o.innerHTML="";
+  Object.entries(routes).forEach(([k,v])=>{let b=document.createElement("button");b.className="option";b.textContent=v.label;b.onclick=()=>pickRoute(k);o.appendChild(b)});
+  return;
+ }
+ document.getElementById("qtext").textContent=q[0];
+ let o=document.getElementById("options");o.innerHTML="";
+ q[1].forEach(([txt,pts])=>{let b=document.createElement("button");b.className="option";b.textContent=txt;b.onclick=()=>answer(pts);o.appendChild(b)});
+}
+function answer(pts){Object.entries(pts).forEach(([k,v])=>scores[k]+=v);qi++; if(qi<questions.length)renderQ();else finish()}
+function pickRoute(k){route=k;questions=[...common,{routePick:true},...routes[k].qs];qi++;renderQ()}
+function finish(){
+ document.getElementById("quiz").classList.add("hide");document.getElementById("result").classList.remove("hide");
+ const vals=Object.values(scores), max=Math.max(...vals), min=Math.min(...vals);
+ const complete=min>=2;
+ let type=complete?"all":Object.keys(scores).sort((a,b)=>scores[b]-scores[a])[0];
+ let data;
+ if(complete){
+  data=["🐒🐒🐒 三猿コンプリート","おめでとうございます。全部です🤣","見てへん・聞いてへん・言うてへんが同時発生中。新しいことを足す前に、今ある商売を一回整理する方が先。","新しいことを始める。",["今ある商品・発信・数字を全部確認","お客さん1人の声を聞く","今週売るものを1つだけ案内"],"新しいこと始めるの禁止。まず今あるもん確認しよか🤣"];
+ } else data=resultCopy[route][type];
+ const prefix=uname?uname+"、":"";
+ document.getElementById("typeBadge").textContent=data[0];
+ document.getElementById("sermon").textContent=prefix+data[1];
+ document.getElementById("reason").textContent=data[2];
+ document.getElementById("dont").textContent=data[3];
+ document.getElementById("actions").innerHTML=data[4].map(x=>"<li>"+x+"</li>").join("");
+ document.getElementById("word").textContent=data[5];
+ const imgs={see:"see-monkey.PNG",hear:"hear-monkey.PNG",speak:"speak-monkey.PNG",all:"three-monkeys.PNG"};
+ document.getElementById("resultImg").src=imgs[type];
+ const labels={see:"🙈 見ざる",hear:"🙉 聞かざる",speak:"🙊 言わざる"};
+ document.getElementById("meters").innerHTML=Object.keys(scores).map(k=>{
+  const pct=Math.min(100,(scores[k]/10)*100);
+  return `<div class="meter"><b>${labels[k]}</b><div class="track"><div class="fill" style="width:${pct}%"></div></div><b>${scores[k]}</b></div>`;
+ }).join("");
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+function restart(){scores={see:0,hear:0,speak:0};route=null;questions=[];qi=0;document.getElementById("result").classList.add("hide");document.getElementById("start").classList.remove("hide");window.scrollTo({top:0,behavior:"smooth"})}
+
+/* 外部ライブラリなしで結果カードをPNG化。
+   DOMをSVG foreignObjectに包み、同一オリジンの画像をdataURL化してからcanvasへ描画する。 */
+async function saveCard(){
+ const card=document.getElementById("shareCard");
+ try{
+  const clone=card.cloneNode(true);
+  const originalImgs=[...card.querySelectorAll("img")], cloneImgs=[...clone.querySelectorAll("img")];
+  for(let i=0;i<originalImgs.length;i++){
+   const r=await fetch(originalImgs[i].src); const blob=await r.blob();
+   const data=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(blob)});
+   cloneImgs[i].src=data;
+  }
+  const width=640;
+  const temp=document.createElement("div"); temp.style.cssText=`position:fixed;left:-9999px;top:0;width:${width}px`; temp.appendChild(clone);document.body.appendChild(temp);
+  const height=Math.ceil(clone.getBoundingClientRect().height)+10;
+  const css=document.querySelector("style").textContent;
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml"><style>${css}#shareCard{width:${width-20}px;margin:0;background:#fffaf0}</style>${clone.outerHTML}</div></foreignObject></svg>`;
+  temp.remove();
+  const url=URL.createObjectURL(new Blob([svg],{type:"image/svg+xml;charset=utf-8"}));
+  const img=new Image(); img.onload=()=>{
+   const c=document.createElement("canvas");c.width=width*2;c.height=height*2;const ctx=c.getContext("2d");ctx.scale(2,2);ctx.fillStyle="#fffaf0";ctx.fillRect(0,0,width,height);ctx.drawImage(img,0,0);
+   URL.revokeObjectURL(url);c.toBlob(blob=>{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="umeko-consult-result.PNG";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)},"image/png");
+  }; img.onerror=()=>{URL.revokeObjectURL(url);alert("画像保存に失敗しました。スクリーンショットで保存してな🐒")}; img.src=url;
+ }catch(e){alert("画像保存に失敗しました。スクリーンショットで保存してな🐒")}
+}
+</script></body></html>
